@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from shapely.geometry import LineString, Point
-# from Original_APF import Vector2d, APF, apf_s
+
 
 def generate_agents_and_tasks(n, max_coordinate=100):
     """
@@ -131,43 +131,29 @@ def resolve_collisions(X, agents, tasks):
                                 inter_point = (inter.x, inter.y)
                                 dist1 = agent_loc.distance(inter)
                                 dist2 = agent_loc2.distance(inter)
-                                obs = [inter.x, inter.y]
-                                # print("obs type     :",type(obs), obs)
-                                if abs(dist1 - dist2) < 10:
-                                    # cost_old = compute_total_cost(i, j, agents, tasks) + compute_total_cost(i2, j2, agents, tasks)
-                                    # cost_new = compute_total_cost(i, j2, agents, tasks) + compute_total_cost(i2, j, agents, tasks)
-                                    # if ((cost_old - cost_new)/cost_old)*100 >=5:
-                                    #     X[i][j2] = 1
-                                    #     X[i2][j] = 1
-                                    #     X[i][j] = 0
-                                    #     X[i2][j2] = 0
-                                    #     break
-                                    # else:
-                                    #      # APF(self, start, goal, obs)
-                                    #     #  print("agent_loc type and value      :",type(list(agent_loc)), list(agent_loc))
-                                        #  print("obs type     :",inter)
-                                    apf_s(agents[i], tasks[j], obs)
-                                    apf_s(agents[i2], tasks[j2], obs)
+
+                                if abs(dist1 - dist2) < 20:
+                                    # X[i][j], X[i2][j2] = X[i2][j2], X[i][j]
+                                    cost_old = compute_total_cost(i, j, agents, tasks) + compute_total_cost(i2, j2, agents, tasks)
+                                    cost_new = compute_total_cost(i, j2, agents, tasks) + compute_total_cost(i2, j, agents, tasks)
+                                    if ((cost_old - cost_new)/cost_old)*100 >=5:
+                                        X[i][j2] = 1
+                                        X[i2][j] = 1
+                                        X[i][j] = 0
+                                        X[i2][j2] = 0
+                                        break
                 
                 U[idx] = [i, j, 1]
                 idx += 1
     
     return X
 
-# n = 10
-# agents, tasks = generate_agents_and_tasks(n)
-
-n = 2
-agents = np.array([[0, 0], [0, 10]])
-tasks = np.array([[10, 0], [10, 10]])
+n = 10
+agents, tasks = generate_agents_and_tasks(n)
 C = generate_cost_matrix(n, agents, tasks)
 X = task_assignment(agents, tasks, n, C)
-X[:,:] = [[0., 1.], [1., 0.]]
-# print("Assingment matrix X is: \n", X)
-# print(type(X))
-# assignment = np.argmax(X, axis=1)
-# visualize_assignments(agents, tasks, assignment)
 X_up = resolve_collisions(X, agents, tasks)
-# print(X_up)
+assignment = np.argmax(X, axis=1)
 assignment_up = np.argmax(X_up, axis=1)
+visualize_assignments(agents, tasks, assignment)
 visualize_assignments(agents, tasks, assignment_up)
